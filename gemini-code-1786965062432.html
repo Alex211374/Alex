@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein MINT-Tagebuch & Klick-Spiel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #282421;
+            --paper: #fcfbf7;
+            --ink: #2c2c2c;
+            --accent: #d97706;
+            --line: #e2ded4;
+            --border: #d4d0c5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kalam', cursive, sans-serif; }
+        body { background: var(--bg); color: var(--ink); min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 35px; color: #f3f4f6; }
+        header h1 { font-size: 3rem; letter-spacing: 1px; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
+        header p { color: #d1d5db; font-size: 1.2rem; }
+        
+        .top-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media(max-width: 768px) {
+            .top-section { grid-template-columns: 1fr; }
+        }
+
+        .controls { background: var(--paper); border: 2px dashed var(--border); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; gap: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transform: rotate(-0.5deg); }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        
+        /* Klick-Spiel */
+        .clicker-card {
+            background: var(--paper);
+            border: 2px dashed var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            transform: rotate(0.5deg);
+        }
+        .clicker-card h3 { font-size: 1.2rem; margin-bottom: 5px; color: var(--accent); }
+        .clicker-stats { font-size: 1rem; color: #444; margin-bottom: 10px; }
+        .click-btn {
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b45309;
+            transition: all 0.1s ease;
+            font-family: 'Kalam', cursive;
+        }
+        .click-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b45309;
+        }
+        .unlock-msg { font-size: 0.95rem; color: #16a34a; font-weight: bold; margin-top: 8px; min-height: 24px; }
+
+        label { font-size: 1.05rem; color: var(--ink); font-weight: bold; }
+        select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: #fff; color: var(--ink); font-size: 1.1rem; outline: none; cursor: pointer; font-family: 'Kalam', cursive; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        
+        /* Tagebuch-Karten */
+        .card { 
+            background: var(--paper); 
+            border: 1px solid var(--border); 
+            border-radius: 4px 12px 12px 4px; 
+            padding: 22px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            position: relative; 
+            box-shadow: 3px 5px 15px rgba(0,0,0,0.25); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-image: 
+                linear-gradient(to right, var(--line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .card:hover { transform: translateY(-3px) rotate(0.3deg); box-shadow: 5px 8px 20px rgba(0,0,0,0.35); }
+        
+        .card::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 30px; 
+            width: 2px; 
+            height: 100%; 
+            background: rgba(239, 68, 68, 0.4); 
+        }
+
+        .card-content { padding-left: 15px; }
+        .card h3 { font-size: 1.4rem; margin-bottom: 4px; color: #1e293b; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
+        
+        .diary-input-group {
+            margin-top: 12px;
+            margin-bottom: 8px;
+            padding-left: 15px;
+        }
+        .diary-input-group label {
+            display: block;
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .diary-textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            padding: 8px;
+            font-family: 'Kalam', cursive;
+            font-size: 1rem;
+            color: #111;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+        }
+        .diary-textarea:focus {
+            background: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.3);
+        }
+        
+        .footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed var(--border); padding-top: 8px; margin-top: 5px; padding-left: 15px; }
+        .date-stamp { font-size: 1.05rem; font-weight: bold; color: var(--accent); }
+        
+        button.action-btn { background: #4f46e5; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; font-family: 'Kalam', cursive; box-shadow: 2px 2px 0px #312e81; transition: all 0.1s; }
+        button.action-btn:hover { background: #4338ca; transform: translateY(-1px); }
+        button.action-btn.joined { background: #16a34a; box-shadow: 2px 2px 0px #14532d; }
+        
+        .smiley-container { display: flex; gap: 5px; margin: 4px 0 4px 15px; font-size: 1.2rem; cursor: pointer; }
+        .smiley { opacity: 0.3; transition: opacity 0.2s; filter: grayscale(80%); }
+        .smiley.active { opacity: 1; filter: grayscale(0%); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 Mein MINT-Tagebuch</h1>
+            <p>Eigene Notizen & Erfinder-Klickspiel</p>
+        </header>
+
+        <div class="top-section">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="cat">Kategorie wählen</label>
+                    <select id="cat">
+                        <option value="all">Alle Einträge</option>
+                        <option value="math">Kategorie 1</option>
+                        <option value="info">Kategorie 2</option>
+                        <option value="nat">Kategorie 3</option>
+                        <option value="tech">Kategorie 4</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="sort">Sortieren nach</label>
+                    <select id="sort">
+                        <option value="day">Wochentag (Mo-Fr)</option>
+                        <option value="rating">Stimmung / Bewertung</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="clicker-card">
+                <h3>💡 Erfinder-Werkstatt</h3>
+                <div class="clicker-stats">Zahnräder: <span id="gearCount">0</span> ⚙️</div>
+                <button class="click-btn" onclick="clickGear()">Tüfteln! 🔧</button>
+                <div id="unlockMsg" class="unlock-msg">Tüftle weiter, um Erfindungen freizuschalten!</div>
+            </div>
+        </div>
+
+        <div id="grid" class="grid"></div>
+    </div>
+
+    <script>
+        let gears = 0;
+        const inventions = [
+            { at: 5, text: "Erfindung freigeschaltet: Mini-Propeller! 🚁" },
+            { at: 15, text: "Erfindung freigeschaltet: Solar-Taschenlampe! 🔦" },
+            { at: 30, text: "Erfindung freigeschaltet: Mini-Roboter-Arm! 🦾" },
+            { at: 50, text: "Erfindung freigeschaltet: Zeitreise-Uhr! ⏳🎉" }
+        ];
+
+        function clickGear() {
+            gears++;
+            document.getElementById('gearCount').textContent = gears;
+            
+            let currentMsg = "Tüftle weiter, um Erfindungen freizuschalten!";
+            for (let inv of inventions) {
+                if (gears >= inv.at) {
+                    currentMsg = inv.text;
+                }
+            }
+            document.getElementById('unlockMsg').textContent = currentMsg;
+        }
+
+        const data = [
+            { id: 1, title: "Geometrie & Muster", userNotes: "", cat: "math", typeKey: "math", dayVal: 1, day: "Montag", rating: 4 },
+            { id: 2, title: "Roboter Programmieren", userNotes: "", cat: "info", typeKey: "info", dayVal: 2, day: "Dienstag", rating: 5 },
+            { id: 3, title: "Chemie Experimente", userNotes: "", cat: "nat", typeKey: "nat", dayVal: 3, day: "Mittwoch", rating: 3 },
+            { id: 4, title: "Brückenbau & Statik", userNotes: "", cat: "tech", typeKey: "tech", dayVal: 4, day: "Donnerstag", rating: 4 },
+            { id: 5, title: "Logik & Rätsel", userNotes: "", cat: "math", typeKey: "math", dayVal: 5, day: "Freitag", rating: 2 }
+        ];
+
+        const grid = document.getElementById('grid');
+        const catFilter = document.getElementById('cat');
+        const sortFilter = document.getElementById('sort');
+
+        function render() {
+            let items = data.filter(i => catFilter.value === 'all' || i.cat === catFilter.value);
+            
+            items.sort((a, b) => {
+                if (sortFilter.value === 'day') return a.dayVal - b.dayVal;
+                if (sortFilter.value === 'rating') return b.rating - a.rating;
+            });
+
+            grid.innerHTML = items.map(item => {
+                let smileysHTML = '';
+                for (let i = 1; i <= 5; i++) {
+                    let activeClass = i <= item.rating ? 'active' : '';
+                    smileysHTML += `<span class="smiley ${activeClass}" onclick="setRating(${item.id}, ${i})">😊</span>`;
+                }
+
+                return `
+                    <div class="card ${item.typeKey}">
+                        <div class="card-content">
+                            <h3>${item.title}</h3>
+                            
+                            <div class="diary-input-group">
+                                <label for="note-${item.id}">✍️ Hier reinschreiben:</label>
+                                <textarea id="note-${item.id}" class="diary-textarea" oninput="updateNote(${item.id}, this.value)">${item.userNotes}</textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="smiley-container">${smileysHTML}</div>
+                            <div class="footer">
+                                <span class="date-stamp">📅 ${item.day}</span>
+                                <button class="action-btn" onclick="this.classList.toggle('joined'); this.textContent = this.classList.contains('joined') ? 'Erfasst' : 'Anmelden';">Anmelden</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setRating(id, newRating) {
+            const item = data.find(d => d.id === id);
+            if (item) {
+                item.rating = newRating;
+                render();
+            }
+        }
+
+        function updateNote(id, text) {
+            const item = data.find(d => d.id === id);
+            if (item) {
+                item.userNotes = text;
+            }
+        }
+
+        catFilter.addEventListener('change', render);
+        sortFilter.addEventListener('change', render);
+        render();
+    </script>
+</body>
+</html>
